@@ -28,6 +28,7 @@ INSTALLED_APPS = [
     "django_celery_beat",  # для планирования задач
     "rest_framework",
     "rest_framework_simplejwt",  # для аутентификации JWT
+    "users",
 ]
 
 MIDDLEWARE = [
@@ -39,6 +40,17 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
+
+# Настройки для работы с CORS
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:8000",
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:8000",
+]
+
+CORS_ALLOW_ALL_ORIGINS = False
 
 ROOT_URLCONF = "config.urls"
 
@@ -102,7 +114,7 @@ MEDIA_ROOT = BASE_DIR / "media"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-# AUTH_USER_MODEL = "users.User"
+AUTH_USER_MODEL = "users.User"
 
 REST_FRAMEWORK = {
     "DEFAULT_FILTER_BACKENDS": ("django_filters.rest_framework.DjangoFilterBackend",),
@@ -128,6 +140,7 @@ if CACHE_ENABLED:
         }
     }
 
+# Настройки Celery
 CELERY_TIMEZONE = TIME_ZONE
 CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 30 * 60
@@ -146,6 +159,7 @@ CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND")
 #     },
 # }
 
+# Настройки OpenAPI
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = os.getenv("EMAIL_HOST")
 EMAIL_PORT = os.getenv("EMAIL_PORT")
