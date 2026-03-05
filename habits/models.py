@@ -22,7 +22,7 @@ class Habit(models.Model):
         related_name="habits",
     )
     place = models.CharField(max_length=255, verbose_name="Место")
-    time_success = models.TimeField(auto_now_add=True, verbose_name="Время начала выполнения привычки")
+    time = models.TimeField(verbose_name="Время начала выполнения привычки")
     action = models.CharField(max_length=500, verbose_name="Действие")
     is_pleasant = models.BooleanField(verbose_name="Признак приятной привычки", default=False)
     related_habit = models.ForeignKey(
@@ -40,17 +40,17 @@ class Habit(models.Model):
         help_text="Периодичность выполнения привычки",
     )
     reward = models.CharField(max_length=500, verbose_name="Вознаграждение", blank=True, null=True)
-    max_time_processing = models.PositiveIntegerField(
+    time_success = models.PositiveIntegerField(
         verbose_name="Максимальное время выполнения (сек)",
         default=120,
-        help_text="Максимальное время на выполнение в секундах",
+        help_text="Время на выполнение в секундах (не более 120)",
     )
     is_public = models.BooleanField(verbose_name="Признак публичности", default=False)
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Дата обновления")
 
     def __str__(self):
-        return f"Я буду {self.action} в {self.time_success} в {self.place}"
+        return f"Я буду {self.action} в {self.time} в {self.place}"
 
     class Meta:
         verbose_name = "Привычка"

@@ -10,6 +10,7 @@ load_dotenv(override=True)  # override=True - перезаписывает пе�
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.getenv("SECRET_KEY")
+TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 
 DEBUG = True if os.getenv("DEBUG") == "True" else False
 
@@ -40,6 +41,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
 ]
 
 # Настройки для работы с CORS
@@ -151,14 +153,6 @@ CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL")
 
 # URL-адрес брокера результатов
 CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND")
-
-# Настройки выполнения периодической задачи для Celery-beat
-# CELERY_BEAT_SCHEDULE = {
-#     "block_inactive_users": {
-#         "task": "users.tasks.block_inactive_users",  # Путь к задаче
-#         "schedule": crontab(day_of_month=1, hour=0, minute=0),  # Расписание выполнения задачи
-#     },
-# }
 
 # Настройки OpenAPI
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
