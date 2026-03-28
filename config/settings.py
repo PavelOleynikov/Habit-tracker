@@ -78,7 +78,7 @@ DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql_psycopg2",
         "NAME": os.getenv("NAME"),
-        "USER": os.getenv("USER"),
+        "USER": os.getenv("DB_USER"),
         "PASSWORD": os.getenv("PASSWORD"),
         "HOST": os.getenv("HOST"),
         "PORT": os.getenv("PORT"),
@@ -111,6 +111,7 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 
 MEDIA_URL = "media/"
 MEDIA_ROOT = BASE_DIR / "media"
@@ -154,7 +155,7 @@ CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL")
 # URL-адрес брокера результатов
 CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND")
 
-# Настройки OpenAPI
+# Настройки для отправки электронной почты
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = os.getenv("EMAIL_HOST")
 EMAIL_PORT = os.getenv("EMAIL_PORT")
