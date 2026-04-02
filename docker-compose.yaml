@@ -1,0 +1,123 @@
+# описание сервисов
+services:
+
+  web: # сервис веб-сервера
+
+    # собрать образ из Dockerfile в текущей папке
+    build: .
+    # команда запуска (многострочная)
+    command: >
+      sh -c "poetry run python manage.py migrate &&
+             poetry run python manage.py runserver 0.0.0.0:8000"
+    volumes:
+      - .:/app
+      - static_volume:/app/static
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      HOST: db
+      DB_USER: pavlushka-1980
+
+  db: # Сервис базы данных (PostgreSQL)
+
+    image: postgres:16.0
+    # берём переменные из файла .env
+    env_file:
+      - .env
+    environment:
+      - POSTGRES_DB=${NAME}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${PASSWORD}
+    # том для сохранения данных БД
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    # проверка, что БД готова
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${DB_USER} -d ${NAME}" ]
+      # проверять каждые 30 секунд
+      interval: 30s
+      # ждать ответа 10 секунд
+      timeout: 10s
+      # количество попыток
+      retries: 5
+
+  redis: # Сервис кэширования (Redis)
+
+    image: redis:7-alpine
+    # проброс порта
+    ports:
+      - "6379:6379"
+    env_file:
+      - .env
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  celery: # Сервис для работы с задачами (Celery)
+
+    build: .
+    command: poetry run celery -A config worker --loglevel=info
+    volumes:
+      - .:/app
+    depends_on:
+      redis:
+        condition: service_healthy
+      db:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      HOST: db
+      CELERY_BROKER_URL: redis://redis:6379/1
+      CELERY_RESULT_BACKEND: redis://redis:6379/1
+
+  celery_beat: # Сервис планировщика задач (Celery Beat)
+
+    build: .
+    command: poetry run celery -A config beat --loglevel=info
+    volumes:
+      - .:/app
+    depends_on:
+      redis:
+        condition: service_healthy
+      db:
+        condition: service_healthy
+      celery:
+        condition: service_started
+    env_file:
+      - .env
+    environment:
+      HOST: db
+      CELERY_BROKER_URL: redis://redis:6379/1
+      CELERY_RESULT_BACKEND: redis://redis:6379/1
+
+  nginx: # Сервис для работы с HTTP-запросами (Nginx)
+
+    build: ./nginx
+    container_name: Habit-tracker-nginx
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    volumes:
+      - static_volume:/app/staticfiles
+    depends_on:
+      - web
+
+networks:
+  default:
+
+volumes:
+  postgres_data:
+  static_volume:
+  redis_data:
